@@ -1,5 +1,23 @@
-- name: Aleph.im compute resource nodes
+- name: Install Aleph.im compute resource nodes
   hosts: compute_hosts
+  # roles:
+  #   - role: caddy_ansible.caddy_ansible
+  #     caddy_setcap: true
+  #     caddy_config: |
+  #       {
+  #           https_port 443
+  #           on_demand_tls {
+  #               interval 60s
+  #               burst    5
+  #           }
+  #       }
+  #       TODO_DOMAIN.fr:443 {
+  #           reverse_proxy http://127.0.0.1:4020 {
+  #               # Forward Host header to the backend
+  #               header_up Host {host}
+  #           }
+  #       }
+
   tasks:
     - name: Update and upgrade apt packages
       become: true
@@ -34,3 +52,75 @@
     - name: Reboot if required
       reboot:
       when: reboot_required.stat.exists
+
+    - name: Set the domain name in supervisor.env
+      lineinfile:
+        path: /etc/aleph-vm/supervisor.env
+        regexp: '^ALEPH_VM_DOMAIN_NAME='
+        line: ALEPH_VM_DOMAIN_NAME=TODO_DOMAIN
+        create: true
+
+    - name: Restart the VM-Supervisor service
+      service:
+        name: aleph-vm-supervisor
+        state: restarted
+
+    - name: Install required packages
+      apt:
+        update_cache: yes
+        name:
+          - debian-keyring
+          - debian-archive-keyring
+          - apt-transport-https
+        state: present
+
+    - name: Add Cloudsmith repository
+      apt_key:
+        url: "https://dl.cloudsmith.io/public/caddy/stable/gpg.key"
+        state: present
+
+    - name: Add Caddy repository to sources list
+      apt_repository:
+        repo:
+          "deb https://dl.cloudsmith.io/public/caddy/stable/deb/debian
+          any-version main"
+        state: present
+        filename: caddy-stable
+
+    - name: Add Caddy src repository to sources list
+      apt_repository:
+        repo:
+          "deb-src https://dl.cloudsmith.io/public/caddy/stable/deb/debian
+          any-version main"
+        state: present
+        filename: caddy-stable
+
+    - name: Install Caddy
+      apt:
+        update_cache: yes
+        name: caddy
+        state: present
+
+    - name: Set Caddyfile
+      copy:
+        dest: /etc/caddy/Caddyfile
+        content: |
+          {
+              https_port 443
+              on_demand_tls {
+                  interval 60s
+                  burst    5
+              }
+          }
+          TODO_DOMAIN:443 {
+              reverse_proxy http://127.0.0.1:4020 {
+                  # Forward Host header to the backend
+                  header_up Host {host}
+              }
+          }
+
+    - name: Restart Caddy service
+      service:
+        name: caddy
+        enabled: yes
+        state: restarted
