@@ -1,0 +1,31 @@
+- name: Caddy - Install required packages
+  apt:
+    update_cache: yes
+    name:
+      - debian-keyring
+      - debian-archive-keyring
+      - apt-transport-https
+    state: present
+
+- name: Caddy - Add Cloudsmith repository
+  apt_key:
+    url: "https://dl.cloudsmith.io/public/caddy/stable/gpg.key"
+    state: present
+
+- name: Caddy - Add repository to sources list
+  apt_repository:
+    repo: "deb https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
+    state: present
+    filename: caddy-stable
+
+- name: Caddy - Add src repository to sources list
+  apt_repository:
+    repo: "deb-src https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
+    state: present
+    filename: caddy-stable
+
+- name: Caddy - Install
+  apt:
+    update_cache: yes
+    name: caddy
+    state: present
