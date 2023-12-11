@@ -59,11 +59,13 @@
         regexp: '^ALEPH_VM_DOMAIN_NAME='
         line: ALEPH_VM_DOMAIN_NAME=TODO_DOMAIN
         create: true
+      register: update_env
 
     - name: Restart the VM-Supervisor service
       service:
         name: aleph-vm-supervisor
         state: restarted
+      when: update_env.changed
 
     - name: Install required packages
       apt:
@@ -118,9 +120,11 @@
                   header_up Host {host}
               }
           }
+      register: caddyfile
 
     - name: Restart Caddy service
       service:
         name: caddy
         enabled: yes
         state: restarted
+      when: caddyfile.changed
