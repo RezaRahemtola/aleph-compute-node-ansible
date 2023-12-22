@@ -1,4 +1,5 @@
 - name: Caddy - Install required packages
+  become: true
   apt:
     update_cache: yes
     name:
@@ -8,23 +9,27 @@
     state: present
 
 - name: Caddy - Add Cloudsmith repository
+  become: true
   apt_key:
     url: "https://dl.cloudsmith.io/public/caddy/stable/gpg.key"
     state: present
 
 - name: Caddy - Add repository to sources list
+  become: true
   apt_repository:
     repo: "deb https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
     state: present
     filename: caddy-stable
 
 - name: Caddy - Add src repository to sources list
+  become: true
   apt_repository:
     repo: "deb-src https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
     state: present
     filename: caddy-stable
 
 - name: Caddy - Install
+  become: true
   apt:
     update_cache: yes
     name: caddy

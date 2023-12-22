@@ -8,8 +8,8 @@ Easily create, update or redeploy [Aleph.im Compute Resource Nodes](https://docs
 - Create an `inventory.ini` file with the following format:
 ```ini
 [compute_hosts]
-root@IP domain=vm.example.org
-root@IP2 domain=vm2.example.org
+username@IP domain=vm.example.org
+username@IP2 domain=vm2.example.org
 
 [compute_hosts:vars]
 node_version=0.3.1

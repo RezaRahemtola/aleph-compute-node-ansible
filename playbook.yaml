@@ -14,6 +14,7 @@
         state: present
 
     - name: Launch the VM-Connector
+      become: true
       docker_container:
         name: vm-connector
         image: alephim/vm-connector:alpha
@@ -23,6 +24,7 @@
         state: started
 
     - name: Install the VM-Supervisor
+      become: true
       apt:
         deb: https://github.com/aleph-im/aleph-vm/releases/download/{{ node_version }}/aleph-vm.ubuntu-22.04.deb
 
@@ -36,6 +38,7 @@
       when: reboot_required.stat.exists
 
     - name: Set the domain name in supervisor.env
+      become: true
       lineinfile:
         path: /etc/aleph-vm/supervisor.env
         regexp: '^ALEPH_VM_DOMAIN_NAME='
@@ -44,6 +47,7 @@
       register: update_env
 
     - name: Restart the VM-Supervisor service
+      become: true
       service:
         name: aleph-vm-supervisor
         state: restarted
@@ -54,6 +58,7 @@
         file: tasks/install_caddy.yaml
 
     - name: Set Caddyfile
+      become: true
       copy:
         dest: /etc/caddy/Caddyfile
         content: |
@@ -73,6 +78,7 @@
       register: caddyfile
 
     - name: Restart Caddy service
+      become: true
       service:
         name: caddy
         enabled: yes
